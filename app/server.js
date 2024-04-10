@@ -1,11 +1,13 @@
 var express = require('express') //llamamos a Express
+var fs = require('fs');
+var https = require('https');
 var app = express()
-var bodyParser = require('body-parser')        
+var bodyParser = require('body-parser')
 
 var port = process.env.PORT || 8090  // establecemos nuestro puerto
 
 app.use(bodyParser.urlencoded({ extended: true }))
-app.use(bodyParser.json()) 
+app.use(bodyParser.json())
 
 app.get('/', function (req, res) {
   res.status(200).json({ message: 'Estás conectado a nuestra API' })
@@ -24,5 +26,14 @@ app.delete('/', function (req, res) {
 })
 
 // iniciamos nuestro servidor
-app.listen(port)
-console.log('API escuchando en el puerto ' + port)
+const options = {
+  key: fs.readFileSync("localhost-key.pem"),
+  cert: fs.readFileSync("localhost.pem"),
+};
+
+// Create HTTPS server
+const server = https.createServer(options, app);
+
+server.listen(port, () => {
+  console.log(`App listening on https://localhost:${port}`);
+});
